@@ -11,20 +11,27 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 include(FetchContent)
 
 # ============================================
-# SDL2 - Auto-download if not found
+# SDL3 - Auto-download if not found
 # ============================================
-find_package(SDL2 QUIET)
+find_package(SDL3 QUIET)
 
-if(NOT SDL2_FOUND)
-    message(STATUS "SDL2 not found, downloading...")
+if(NOT SDL3_FOUND)
+    message(STATUS "SDL3 not found, downloading...")
     FetchContent_Declare(
-        SDL2
+        SDL3
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
         GIT_TAG release-3.2.28
     )
-    FetchContent_MakeAvailable(SDL2)
-    set(SDL2_LIBRARIES SDL2::SDL2)
-    set(SDL2_INCLUDE_DIRS ${sdl2_SOURCE_DIR}/include)
+    set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+    set(SDL_STATIC ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(SDL3)
+    
+    # SDL3 creates SDL3::SDL3 target automatically
+    set(SDL_LIBRARIES SDL3::SDL3)
+    set(SDL_INCLUDE_DIRS ${sdl3_SOURCE_DIR}/include)
+else()
+    # System SDL3 found
+    set(SDL_LIBRARIES SDL3::SDL3)
 endif()
 
 # ============================================
@@ -54,17 +61,17 @@ add_library(imgui STATIC
     ${IMGUI_DIR}/imgui_draw.cpp
     ${IMGUI_DIR}/imgui_tables.cpp
     ${IMGUI_DIR}/imgui_widgets.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer2.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer3.cpp
 )
 
 target_include_directories(imgui PUBLIC
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
-    ${SDL2_INCLUDE_DIRS}
+    ${SDL_INCLUDE_DIRS}
 )
 
-target_link_libraries(imgui PUBLIC ${SDL2_LIBRARIES})
+target_link_libraries(imgui PUBLIC SDL3::SDL3)
 
 # ImPlot (depends on ImGui)
 add_library(implot STATIC
@@ -96,11 +103,11 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
-    ${SDL2_INCLUDE_DIRS}
+    ${SDL_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${SDL2_LIBRARIES}
+    SDL3::SDL3
     Eigen3::Eigen
     imgui
     implot
@@ -108,11 +115,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 # Windows: copy required DLLs to build directory
-if(WIN32)
+if(WIN32 AND TARGET SDL3::SDL3)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:SDL2::SDL2>
+        $<TARGET_FILE:SDL3::SDL3>
         $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMENT "Copying SDL3 DLL to output directory"
     )
 endif()
 
