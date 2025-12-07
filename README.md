@@ -62,7 +62,6 @@ ArtificialLife/
     ├── imgui/              # Dear ImGui
     ├── implot/             # ImPlot
     └── json/               # nlohmann/json
-
 ```
 
 ## VSCodium Setup
