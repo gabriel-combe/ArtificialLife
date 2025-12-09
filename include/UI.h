@@ -1,6 +1,8 @@
 #pragma once
 
 #include <imgui.h>
+#include <cstdio>
+#include "Boid.h"
 
 // UI system for simulation controls
 class UISystem {
@@ -14,7 +16,7 @@ public:
     
     // Render control panel
     void render(int activeBoidCount, float fps, BoidParameters& params) {
-        ImGui::Begin("Boids Control Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Begin("Boids Control Panel");
         
         ImGui::Text("Simulation Controls");
         ImGui::Separator();
@@ -58,9 +60,8 @@ public:
             ImGui::SliderFloat("Cohesion Weight", &params.cohesionWeight, 0.0f, 5.0f);
             
             // Update squared radii if any radius changed
-            if (radiusChanged) {
+            if (radiusChanged)
                 params.updateSquaredRadii();
-            }
             
             if (ImGui::Button("Reset Parameters")) {
                 params.separationRadius = 50.0f;

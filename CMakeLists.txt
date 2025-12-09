@@ -97,7 +97,7 @@ target_include_directories(nlohmann_json INTERFACE ${JSON_DIR}/include)
 # Main Executable
 # ============================================
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
+file(GLOB_RECURSE HEADERS "include/*.h")
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
