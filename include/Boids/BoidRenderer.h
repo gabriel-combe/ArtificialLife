@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include "Boid.h"
+#include "Boids/Boid.h"
 #include <vector>
 #include <random>
 
