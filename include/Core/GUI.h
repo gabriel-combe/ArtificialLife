@@ -39,6 +39,17 @@ public:
     
     static bool CollapsingHeader(const char* label);
     
+    // ID stack for unique widget identification
+    static void PushID(int id);
+    static void PushID(const char* id);
+    static void PopID();
+    
+    // Color widgets
+    static bool ColorButton(const char* desc_id, const ImVec4& col);
+    
+    // Text variants
+    static void BulletText(const char* text);
+    
     // Get IO for advanced features
     static ImGuiIO& GetIO() { return ImGui::GetIO(); }
 };

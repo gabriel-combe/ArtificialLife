@@ -8,17 +8,20 @@
 // Forward declarations
 Application* CreateBoidsApplication();
 Application* CreateParticlesKNNApplication();
+Application* CreateParticleLifeApplication();
 
 // Entry point
 int main(int argc, char* argv[]) {
     // Create application instance
     // Application* app = CreateBoidsApplication();
-    Application* app = CreateParticlesKNNApplication();
+    // Application* app = CreateParticlesKNNApplication();
+    Application* app = CreateParticleLifeApplication();
     
     // Configure application
     ApplicationConfig config;
     // config.title = "ArtificialLife - Boids Simulation";
-    config.title = "ArtificialLife - Particles KNN Simulation";
+    // config.title = "ArtificialLife - Particles KNN Simulation";
+    config.title = "ArtificialLife - Particles Life Simulation";
     config.width = 1920;
     config.height = 1080;
     config.resizable = true;

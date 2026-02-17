@@ -134,3 +134,23 @@ bool GUI::SliderInt(const char* label, int* v, int min, int max) {
 bool GUI::CollapsingHeader(const char* label) {
     return ImGui::CollapsingHeader(label);
 }
+
+void GUI::PushID(int id) {
+    ImGui::PushID(id);
+}
+
+void GUI::PushID(const char* id) {
+    ImGui::PushID(id);
+}
+
+void GUI::PopID() {
+    ImGui::PopID();
+}
+
+bool GUI::ColorButton(const char* desc_id, const ImVec4& col) {
+    return ImGui::ColorButton(desc_id, col);
+}
+
+void GUI::BulletText(const char* text) {
+    ImGui::BulletText("%s", text);
+}
