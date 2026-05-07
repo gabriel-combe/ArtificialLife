@@ -55,7 +55,19 @@ public:
     // Render the control panel
     void RenderControlPanel() {
         GUI::BeginWindow("Boids Control Panel");
-        
+
+        if (IsRecording()) {
+            ImGui::TextColored(ImVec4(1.f, 0.2f, 0.2f, 1.f), "* REC  (F8 to stop)");
+        } else if (IsConverting()) {
+            ImGui::TextColored(ImVec4(1.f, 0.8f, 0.f, 1.f), "Converting to MP4...");
+        } else {
+            GUI::Text("F8 : start recording");
+        }
+        if (GUI::Button("Screenshot (F9)")) {
+            RequestScreenshot();
+        }
+        GUI::Separator();
+
         GUI::Text("Simulation Controls");
         GUI::Separator();
         

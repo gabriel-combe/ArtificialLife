@@ -63,12 +63,25 @@ void Application::Run() {
         while (SDL_PollEvent(&event)) {
             GUI::ProcessEvent(&event);
             Input::ProcessEvent(&event);
+
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_F8) {
+                if (!recorder_.isRecording())
+                    OnRecordingStart();   // let derived class inject audio source
+                recorder_.toggle(screenWidth, screenHeight);
+            }
+
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_F9) {
+                RequestScreenshot();
+            }
             
             if (event.type == SDL_EVENT_QUIT) {
                 Quit();
             }
         }
         
+        // Update input
+        Input::Update();
+
         // Update screen size
         UpdateScreenSize();
         
@@ -81,6 +94,14 @@ void Application::Run() {
         
         // User render
         OnRender();
+
+        // Record if started
+        recorder_.captureFrame(renderer);
+
+        if (screenshotRequested_) {
+            recorder_.screenshot(renderer);
+            screenshotRequested_ = false;
+        }
         
         // GUI
         GUI::BeginFrame();
@@ -90,6 +111,10 @@ void Application::Run() {
         // Present
         SDL_RenderPresent(renderer);
     }
+
+    // Launch ffmpeg if recording
+    if (recorder_.isRecording())
+        recorder_.toggle(screenWidth, screenHeight);
     
     // Cleanup
     OnShutdown();

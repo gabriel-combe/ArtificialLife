@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Options
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 include(FetchContent)
@@ -23,14 +22,11 @@ if(NOT SDL3_FOUND)
         GIT_TAG release-3.2.28
     )
     set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-    set(SDL_STATIC ON CACHE BOOL "" FORCE)
+    set(SDL_STATIC ON  CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(SDL3)
-    
-    # SDL3 creates SDL3::SDL3 target automatically
     set(SDL_LIBRARIES SDL3::SDL3)
     set(SDL_INCLUDE_DIRS ${sdl3_SOURCE_DIR}/include)
 else()
-    # System SDL3 found
     set(SDL_LIBRARIES SDL3::SDL3)
 endif()
 
@@ -50,9 +46,21 @@ if(NOT Eigen3_FOUND)
 endif()
 
 # ============================================
+# OpenMP - Parallel outer loop in Cluster::rule()
+# ============================================
+find_package(OpenMP)
+
+if(OpenMP_CXX_FOUND)
+    message(STATUS "OpenMP found — parallel particle updates enabled")
+else()
+    message(WARNING "OpenMP not found — simulation will run single-threaded. "
+                    "Install libomp-dev (Linux) or Xcode command-line tools (macOS).")
+endif()
+
+# ============================================
 # Dear ImGui + ImPlot (from submodules)
 # ============================================
-set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/external/imgui)
+set(IMGUI_DIR  ${CMAKE_SOURCE_DIR}/external/imgui)
 set(IMPLOT_DIR ${CMAKE_SOURCE_DIR}/external/implot)
 
 add_library(imgui STATIC
@@ -73,7 +81,6 @@ target_include_directories(imgui PUBLIC
 
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 
-# ImPlot (depends on ImGui)
 add_library(implot STATIC
     ${IMPLOT_DIR}/implot.cpp
     ${IMPLOT_DIR}/implot_items.cpp
@@ -94,6 +101,11 @@ add_library(nlohmann_json INTERFACE)
 target_include_directories(nlohmann_json INTERFACE ${JSON_DIR}/include)
 
 # ============================================
+# miniaudio (single-header audio library)
+# ============================================
+set(MINIAUDIO_DIR ${CMAKE_SOURCE_DIR}/external/miniaudio)
+
+# ============================================
 # Main Executable
 # ============================================
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/Core/*.cpp")
@@ -104,8 +116,37 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${SDL_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/external
+    ${MINIAUDIO_DIR}
 )
 
+# Use WASAPI on Windows (best backend); disable legacy DirectSound / WinMM
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        MA_NO_DSOUND
+        MA_NO_WINMM
+    )
+endif()
+
+# ── Optimisation flags ────────────────────────────────────────────────────────
+# -O3        : full auto-vectorisation + loop unrolling
+# -march=native: use all SIMD extensions available on the build machine (SSE/AVX)
+#               Remove this flag if you distribute the binary to other machines.
+#
+# NOTE: /O2 is incompatible with /RTC1 (MSVC runtime checks added in Debug).
+#       We use generator expressions so optimisation flags only apply in
+#       Release / RelWithDebInfo builds — never in Debug.
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        $<$<NOT:$<CONFIG:Debug>>:/O2 /fp:fast>
+    )
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        $<$<NOT:$<CONFIG:Debug>>:-O3 -march=native -ffast-math>
+    )
+endif()
+
+# ── Link libraries ────────────────────────────────────────────────────────────
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3
     Eigen3::Eigen
@@ -114,12 +155,17 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     nlohmann_json
 )
 
-# Windows: copy required DLLs to build directory
+# OpenMP (optional — gracefully skipped if not installed)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
+# ── Windows: copy SDL3 DLL ────────────────────────────────────────────────────
 if(WIN32 AND TARGET SDL3::SDL3)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:SDL3::SDL3>
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+            $<TARGET_FILE:SDL3::SDL3>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
         COMMENT "Copying SDL3 DLL to output directory"
     )
 endif()
@@ -127,6 +173,4 @@ endif()
 # ============================================
 # Installation
 # ============================================
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION bin
-)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

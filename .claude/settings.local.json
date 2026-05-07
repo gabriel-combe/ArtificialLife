@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmake -S . -B build -DCMAKE_BUILD_TYPE=Release)",
+      "Bash(cmake --build build --config Release)",
+      "Bash(curl -L -o \"c:/Code/C++/ArtificialLife/external/miniaudio/miniaudio.h\" \"https://raw.githubusercontent.com/mackron/miniaudio/master/miniaudio.h\")",
+      "Bash(./ArtificialLife.exe)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(cmd /c \"ArtificialLife.exe\")",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(powershell -command \"& .\\\\ArtificialLife.exe\")",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Release\"; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru -Wait -RedirectStandardOutput \"out.txt\" -RedirectStandardError \"err.txt\" 2>&1; Get-Content \"out.txt\" -ErrorAction SilentlyContinue; Get-Content \"err.txt\" -ErrorAction SilentlyContinue; \"Exit code: $\\($proc.ExitCode\\)\")",
+      "Bash(cmake --build build --config Debug)",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Debug\"; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru -Wait -RedirectStandardOutput \"out.txt\" -RedirectStandardError \"err.txt\" 2>&1; Get-Content \"out.txt\" -ErrorAction SilentlyContinue; Get-Content \"err.txt\" -ErrorAction SilentlyContinue; \"Exit code: $\\($proc.ExitCode\\)\")",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Release\"; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru; Start-Sleep -Seconds 3; $running = !$proc.HasExited; if \\($running\\) { $proc.Kill\\(\\); \"App launched and ran for 3s OK\" } else { \"Crashed with exit code: $\\($proc.ExitCode\\)\" })",
+      "Bash(powershell -command \"dumpbin /DEPENDENTS build/Release/ArtificialLife.exe 2>&1\")",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Release\"; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru; Start-Sleep -Seconds 3; $running = !$proc.HasExited; if \\($running\\) { $proc.Kill\\(\\); \"OK — app launched and ran 3s\" } else { \"Crashed: $\\($proc.ExitCode\\)\" })",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Release\"; Remove-Item ab_ctor.txt,mlp_ctor.txt,ac_ctor.txt -ErrorAction SilentlyContinue; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru -Wait; \"Exit: $\\($proc.ExitCode\\)\"; \"--- ab_ctor.txt ---\"; Get-Content ab_ctor.txt -ErrorAction SilentlyContinue; \"--- mlp_ctor.txt ---\"; Get-Content mlp_ctor.txt -ErrorAction SilentlyContinue; \"--- ac_ctor.txt ---\"; Get-Content ac_ctor.txt -ErrorAction SilentlyContinue)",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Release\"; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru; Start-Sleep -Seconds 4; $running = !$proc.HasExited; if \\($running\\) { $proc.Kill\\(\\); \"OK — app launched and ran 4s\" } else { \"Crashed: $\\($proc.ExitCode\\)\" })",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Release\"; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru; Start-Sleep -Seconds 4; $running = !$proc.HasExited; if \\($running\\) { $proc.Kill\\(\\); \"OK\" } else { \"Crashed: $\\($proc.ExitCode\\)\" })",
+      "PowerShell(cd \"C:\\\\Code\\\\C++\\\\ArtificialLife\\\\build\\\\Release\"; $proc = Start-Process -FilePath \".\\\\ArtificialLife.exe\" -PassThru; Start-Sleep -Seconds 3; $r = !$proc.HasExited; if\\($r\\){$proc.Kill\\(\\);\"OK\"}else{\"Crashed: $\\($proc.ExitCode\\)\"})"
+    ]
+  }
+}

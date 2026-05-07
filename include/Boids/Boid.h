@@ -46,20 +46,18 @@ struct Boid {
     }
     
     void getTrianglePoints(Eigen::Vector2f& p1, Eigen::Vector2f& p2, Eigen::Vector2f& p3) const {
-        float angle = getHeading();
-        float cos_a = std::cos(angle);
-        float sin_a = std::sin(angle);
-        
-        p1.x() = position.x() + cos_a * size;
-        p1.y() = position.y() + sin_a * size;
-        
-        float angle_left = angle + 2.5f;
-        p2.x() = position.x() + std::cos(angle_left) * (size * 0.5f);
-        p2.y() = position.y() + std::sin(angle_left) * (size * 0.5f);
-        
-        float angle_right = angle - 2.5f;
-        p3.x() = position.x() + std::cos(angle_right) * (size * 0.5f);
-        p3.y() = position.y() + std::sin(angle_right) * (size * 0.5f);
+        // Derive heading from velocity directly — avoids atan2 + 4 trig calls.
+        // Wing angle preserved: rotate dir by ±2.5 rad using precomputed constants.
+        // cos(2.5) ≈ -0.8011, sin(2.5) ≈ 0.5985
+        static constexpr float cw = -0.8011f, sw = 0.5985f;
+        const Eigen::Vector2f dir = velocity.stableNormalized();
+        const float half = size * 0.5f;
+
+        p1 = position + dir * size;
+        p2 = position + Eigen::Vector2f(dir.x() * cw - dir.y() * sw,
+                                         dir.x() * sw + dir.y() * cw) * half;
+        p3 = position + Eigen::Vector2f(dir.x() * cw + dir.y() * sw,
+                                        -dir.x() * sw + dir.y() * cw) * half;
     }
 };
 

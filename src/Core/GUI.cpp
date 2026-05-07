@@ -1,6 +1,7 @@
 #include "Core/GUI.h"
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
+#include <implot.h>
 #include <iostream>
 
 bool GUI::initialized = false;
@@ -23,7 +24,9 @@ void GUI::Initialize(SDL_Window* window, SDL_Renderer* renderer) {
 
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
-    
+
+    ImPlot::CreateContext();
+
     initialized = true;
     std::cout << "[GUI] Initialized" << std::endl;
 }
@@ -78,6 +81,7 @@ void GUI::EndFrame(SDL_Renderer* renderer) {
 void GUI::Shutdown() {
     if (!initialized) return;
     
+    ImPlot::DestroyContext();
     ImGui_ImplSDLRenderer3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
